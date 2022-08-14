@@ -28,7 +28,7 @@ def greedy_policy(V, env, gamma):
             max_action = argmax(action_values)
 
             # greedyな方策
-            action_probs = {0: 0, 1: 0, 2: 0, 3: 0}
+            action_probs = {0: 0., 1: 0., 2: 0., 3: 0.}
             action_probs[max_action] = 1.0
             pi[state] = action_probs
     return pi
