@@ -1,5 +1,6 @@
 import numpy as np
-from bandit import Bandit, Agent
+
+from algorithm.bandit import Bandit, Agent
 
 
 class NonStatBandit:

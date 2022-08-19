@@ -1,36 +1,31 @@
 from collections import defaultdict
-from gridworld import GridWorld
+from env.gridworld import GridWorld
 
-from policy_iter import greedy_policy
 
-def value_iter_onestep(V, env, gamma):
-    """価値反復法の1ステップ，
+def eval_onestep(pi, V, env, gamma=0.9):
+    """反復方策評価の1ステップ，全状態の価値関数を1回ずつ更新
     """
     for state in env.states():
         if state == env.goal_state:
             V[state] = 0
             continue
         
-        action_values = []
+        action_probs = pi[state]
+        new_V = 0
 
-        for action in env.actions():
+        for action, action_prob in action_probs.items():
             next_state = env.next_state(state, action)
             r = env.reward(state, action, next_state)
-            value = r + gamma * V[next_state]
-            action_values.append(value)
-
-        V[state] = max(action_values)
+            new_V += action_prob * (r + gamma * V[next_state])
+        V[state] = new_V
     return V
 
-def value_iter(V, env, gamma, threshold=0.001, is_render=True):
-    """価値反復法
+def policy_eval(pi, V, env, gamma, threshold=0.001):
+    """反復方策評価
     """
     while True:
-        if is_render:
-            env.render_v(V)
-
         old_V = V.copy()
-        V = value_iter_onestep(V, env, gamma)
+        V = eval_onestep(pi, V, env, gamma)
 
         # 更新された価値関数の値の最大値と閾値を比べる
         delta = 0
@@ -45,11 +40,11 @@ def value_iter(V, env, gamma, threshold=0.001, is_render=True):
 
 
 if __name__ == '__main__':
-    V = defaultdict(lambda: 0)
     env = GridWorld()
     gamma = 0.9
 
-    V = value_iter(V, env, gamma, is_render=True)
+    pi = defaultdict(lambda: {0: 0.25, 1: 0.25, 2: 0.25, 3: 0.25})
+    V = defaultdict(lambda: 0)
 
-    pi = greedy_policy(V, env, gamma)
+    V = policy_eval(pi, V, env, gamma)
     env.render_v(V, pi)

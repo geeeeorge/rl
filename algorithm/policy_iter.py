@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-from gridworld import GridWorld
-from policy_eval import policy_eval
+from env.gridworld import GridWorld
+from eval.policy_eval import policy_eval
 
 
 def argmax(d):

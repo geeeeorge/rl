@@ -1,19 +1,17 @@
 from collections import defaultdict
 import numpy as np
 
-from gridworld import GridWorld
-from greedy_probs import greedy_probs
+from env.gridworld import GridWorld
 
 
-class McAgent:
+class RandomAgent:
     def __init__(self):
         self.gamma = 0.9
-        self.epsilon = 0.1  # epsilon = 0だと収束しない
-        self.alpha = 0.1
         self.action_size = 4
 
         self.pi = defaultdict(lambda: {0: 0.25, 1: 0.25, 2: 0.25, 3: 0.25})
-        self.Q = defaultdict(lambda: 0)
+        self.V = defaultdict(lambda: 0)
+        self.cnts = defaultdict(lambda: 0)
         self.memory = []
 
     def get_action(self, state):
@@ -22,29 +20,27 @@ class McAgent:
         probs = list(action_probs.values())
         return np.random.choice(actions, p=probs)
 
-    def add(self, state, actioin, reward):
+    def add(self, state, action, reward):
         data = (state, action, reward)
         self.memory.append(data)
 
     def reset(self):
         self.memory.clear()
 
-    def update(self):
+    def eval(self):
         G = 0
         for data in reversed(self.memory):
             state, action, reward = data
             G = self.gamma * G + reward
-            key = (state, action)  # Q関数の引数に合わせる
-            self.Q[key] += (G - self.Q[key]) * self.alpha
-
-            self.pi[state] = greedy_probs(self.Q, state, self.epsilon)
+            self.cnts[state] += 1
+            self.V[state] += (G - self.V[state]) / self.cnts[state]
 
 
 if __name__ == '__main__':
     env = GridWorld()
-    agent = McAgent()
+    agent = RandomAgent()
 
-    episodes = 10000
+    episodes = 1000
     for epiisode in range(episodes):
         state = env.reset()
         agent.reset()
@@ -55,9 +51,9 @@ if __name__ == '__main__':
 
             agent.add(state, action, reward)
             if done:
-                agent.update()
+                agent.eval()
                 break
 
             state = next_state
     
-    env.render_q(agent.Q)
+    env.render_v(agent.V)
