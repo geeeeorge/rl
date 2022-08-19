@@ -2,7 +2,7 @@ from collections import defaultdict, deque
 import numpy as np
 
 from env.gridworld import GridWorld
-from util.greedy_probs import greedy_probs
+from utils.greedy_probs import greedy_probs
 
 
 class SarsaAgent:
